@@ -28,8 +28,15 @@ the dashboard.
 - **A star in the admin header** favourites the page you are on, and clicking it again
   removes the page. A filled star means the current page is already a quick link. The
   label defaults to the page title ("Orders", "Products") and can be renamed later.
-- **Pinned links show as buttons in their own header row**, so each one is a single
-  click away, with no dropdown to open first.
+- **Pinned links show as buttons in the first row of the header**, above the page
+  title, so each one is a single click away, with no dropdown to open first.
+- **They stay reachable while you scroll.** On pages with Magento's sticky action bar
+  (configuration, edit forms, most grids), the chips appear inside that bar, between
+  the page title and its buttons, once it turns sticky. Chips that don't fit are
+  cut off at the buttons and fade out; the bar keeps its normal height.
+
+![Quick links inside the sticky action bar on a configuration page](docs/images/sticky-bar.png)
+
 - **Unpinned links go into the dropdown next to the star.** Pinning is per link, so the
   daily pages stay visible and the occasional ones wait in the dropdown. The dropdown
   always ends with a fixed *Manage quick links →* entry.
@@ -85,7 +92,10 @@ runs on `backend`.
 ## Not in this version
 
 - Sharing links between users, or setting them per role. Every list is personal.
-- A limit on the number of links. The header row wraps instead of hiding links.
+- A limit on the number of links. The header row wraps instead of hiding links; in
+  the sticky bar, links past the available width are cut off.
+- Sticky links on pages without Magento's action bar: there, the chips scroll away
+  with the header.
 
 ## Compatibility
 
@@ -120,4 +130,6 @@ A browser end-to-end run against 2.4.8-p5 (Playwright, custom admin frontName
 - adding external and pasted admin links
 - renaming and pinning
 - arrow and drag-and-drop reordering after a reload
+- the chip copy in the sticky action bar: bar height unchanged, no overlap with the
+  buttons, and kept in sync when the star adds or removes a link
 - rejection of `javascript:` URLs, cross-user writes and requests without a form key

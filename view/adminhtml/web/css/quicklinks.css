@@ -7,7 +7,7 @@
  * @link https://brocode.at
  */
 
-/* Header row 1: star + dropdown, floated with search / notifications / user */
+/* Header row 2: star + dropdown, floated with search / notifications / user */
 .brocode-quicklinks.admin__action-dropdown-wrap {
     display: flex;
     align-items: center;
@@ -16,36 +16,58 @@
     margin-right: .6rem;
 }
 
-/*
- * Header row 2: the pinned chips. The bar lives inside .page-header-actions, which is only
- * a third of the header wide (col-l-4) or half of it (col-m-6); the negative margin
- * stretches it back to the full header width so the chips are not squeezed.
- */
+/* Header row 1: the pinned chips, above the title / actions row */
 .brocode-quicklinks-bar {
     display: flex;
     flex-wrap: wrap;
-    justify-content: flex-end;
+    justify-content: flex-start;
     gap: .5rem;
-    clear: both;
     margin: 0;
     padding: 0;
     list-style: none;
 }
 
 .brocode-quicklinks-bar:has(> li) {
-    padding-top: .6rem;
+    padding-bottom: 1rem;
 }
 
-@media (min-width: 768px) {
-    .page-header-actions .brocode-quicklinks-bar {
-        margin-left: -100%;
-    }
+/* Copy of the chips inside Magento's sticky page actions bar, only while it is fixed.
+   As a flex container it sits between the floated title and buttons and takes exactly
+   the room left there. Zero height keeps the bar at its core height (title and buttons
+   are floats and give it none); overflow-x: clip cuts off chips that do not fit while
+   the chips still paint below the zero-height box. */
+.page-actions .brocode-quicklinks-sticky {
+    display: none;
 }
 
-@media (min-width: 1024px) {
-    .page-header-actions .brocode-quicklinks-bar {
-        margin-left: -200%;
-    }
+.page-actions._fixed .brocode-quicklinks-sticky {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    height: 0;
+    overflow-x: clip;
+    overflow-y: visible;
+    position: relative;
+    top: .8rem;
+    margin: 0;
+    padding: 0 0 0 2rem;
+}
+
+/* Chips that do not fit are clipped; this fade in the bar's own colour shows that more
+   follow. Over empty space (everything fits) it is invisible. */
+.page-actions._fixed .brocode-quicklinks-sticky::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 3rem;
+    height: 3rem;
+    background: linear-gradient(to right, rgba(248, 248, 248, 0), #f8f8f8);
+    pointer-events: none;
+}
+
+.brocode-quicklinks-sticky .brocode-quicklinks-item {
+    flex: 0 0 auto;
 }
 
 .brocode-quicklinks-item {

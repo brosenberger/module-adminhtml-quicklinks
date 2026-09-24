@@ -16,6 +16,11 @@ define([
     /**
      * Header star: adds the current page as a pinned quick link, or removes it again.
      * The pinned chips live in a separate header row, so they are looked up by selector.
+     *
+     * When Magento's page actions bar turns sticky on scroll (mage/backend/floating-header
+     * adds `_fixed`), a copy of the chips is placed into it, between title and buttons.
+     * The copy is made lazily at that moment because floating-header rebuilds the bar's
+     * markup on init, and is only shown while the bar is fixed (see quicklinks.css).
      */
     $.widget('brocode.quickLinksToggle', {
         options: {
@@ -28,6 +33,24 @@ define([
             this.star = this.element.find('[data-role=quicklinks-star]');
             this.bar = $('[data-role=quicklinks-bar]');
             this.star.on('click', this._toggle.bind(this));
+            // Deferred a frame: floating-header sets `_fixed` in its own scroll handler,
+            // which may run after this one.
+            $(window).on('scroll resize', function () {
+                window.requestAnimationFrame(this._syncSticky.bind(this));
+            }.bind(this));
+        },
+
+        _syncSticky: function () {
+            var inner = $('.page-actions._fixed .page-actions-inner');
+
+            if (inner.length && !inner.children('.brocode-quicklinks-sticky').length) {
+                inner.append(this.bar.clone().removeAttr('data-role').addClass('brocode-quicklinks-sticky'));
+            }
+        },
+
+        _chipsChanged: function () {
+            $('.brocode-quicklinks-sticky').remove();
+            this._syncSticky();
         },
 
         _toggle: function () {
@@ -37,6 +60,7 @@ define([
                 this._post(this.options.deleteUrl, {id: id}).done(function () {
                     this.element.add(this.bar).find('[data-link-id="' + id + '"]').remove();
                     this._setCurrent(null);
+                    this._chipsChanged();
                 }.bind(this));
 
                 return;
@@ -46,6 +70,7 @@ define([
                 .done(function (response) {
                     this.bar.append(this._chip(response.link));
                     this._setCurrent(response.link.id);
+                    this._chipsChanged();
                 }.bind(this));
         },
 
