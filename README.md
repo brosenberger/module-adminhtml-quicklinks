@@ -28,8 +28,12 @@ the dashboard.
 - **A star in the admin header** favourites the page you are on, and clicking it again
   removes the page. A filled star means the current page is already a quick link. The
   label defaults to the page title ("Orders", "Products") and can be renamed later.
-- **Pinned links show as buttons in the first row of the header**, above the page
-  title, so each one is a single click away, with no dropdown to open first.
+- **Pinned links show as buttons at the very top of every page**, above the page
+  title, so each one is a single click away, with no dropdown to open first. They sit
+  in the strip Magento reserves for system messages on every page; system messages,
+  when there are any, appear right below the chips.
+
+![Quick links above a system message](docs/images/header-with-messages.png)
 - **They stay reachable while you scroll, on every page.**
   - On pages with Magento's sticky action bar (configuration, edit forms, most grids),
     the chips appear inside that bar, between the page title and its buttons, once it

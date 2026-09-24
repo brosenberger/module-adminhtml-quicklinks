@@ -16,8 +16,10 @@
                    aclResource="BroCode_AdminhtmlQuickLinks::quicklinks"/>
         </referenceContainer>
         <!-- The backend theme moves search, notifications and user into header.inner.right;
-             the star floats with them. The bar stays in header, as its first row. -->
+             the star floats with them. The bar goes first into the notices area above the
+             header: core reserves 5rem there on every page (for system messages), so with
+             no messages the chips use space that is empty anyway. -->
         <move element="brocode.quicklinks.star" destination="header.inner.right" after="notification.messages"/>
-        <move element="brocode.quicklinks.bar" destination="header" before="-"/>
+        <move element="brocode.quicklinks.bar" destination="notices.wrapper" before="-"/>
     </body>
 </page>

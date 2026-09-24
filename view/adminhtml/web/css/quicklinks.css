@@ -16,7 +16,7 @@
     margin-right: .6rem;
 }
 
-/* Header row 1: the pinned chips, above the title / actions row */
+/* The pinned chips, first in the notices area above the header (see default.xml) */
 .brocode-quicklinks-bar {
     display: flex;
     flex-wrap: wrap;
@@ -27,8 +27,9 @@
     list-style: none;
 }
 
+/* Centred in core's 5rem notices min-height; system messages, if any, follow below. */
 .brocode-quicklinks-bar:has(> li) {
-    padding-bottom: 1rem;
+    padding: 1rem 0;
 }
 
 /* Copy of the chips inside Magento's sticky page actions bar, only while it is fixed.

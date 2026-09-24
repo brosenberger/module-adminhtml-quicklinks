@@ -43,8 +43,8 @@ use Magento\Framework\Serialize\Serializer\Json;
  *
  * - `header/star.phtml` sits with the other header actions (search, notifications, user):
  *   the star toggle for the current page and the dropdown of unpinned links.
- * - `header/bar.phtml` is the first row of the header, above title and actions, holding
- *   the pinned links (see default.xml).
+ * - `header/bar.phtml` holds the pinned links, first in the notices area above the
+ *   header, where core reserves room for system messages (see default.xml).
  */
 class QuickLinks extends Template
 {
