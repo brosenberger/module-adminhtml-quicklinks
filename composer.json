@@ -2,7 +2,7 @@
     "name": "brocode/module-adminhtml-quicklinks",
     "description": "Personal quick links for Magento 2 admin users: favorite any backend page with one click, keep the links one click away in the admin header, and manage them - reorder, rename, pin, add external links - under System > Tools.",
     "type": "magento2-module",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "license": "MIT",
     "homepage": "https://github.com/brosenberger/module-adminhtml-quicklinks",
     "keywords": [
