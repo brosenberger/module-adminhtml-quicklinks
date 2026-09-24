@@ -19,6 +19,10 @@ define([
      * System > Tools > Quick Links. Drag & drop and the arrow buttons both reorder the
      * list in the DOM first and then persist the whole order in one request; a failed
      * request puts the previous order back.
+     *
+     * Every saved change is announced as `brocodeQuickLinksChanged` on document with the
+     * full list, so the header chips on this page follow without a reload; chips dragged
+     * in the header come back as `brocodeQuickLinksReordered`.
      */
     $.widget('brocode.quickLinksManage', {
         options: {
@@ -30,8 +34,10 @@ define([
         _create: function () {
             this.list = this.element.find('[data-role=quicklinks-list]');
             this.list.sortable({
+                items: '> [data-link-id]',
                 handle: '[data-role=drag-handle]',
                 axis: 'y',
+                helper: this._dragHelper,
                 start: function () {
                     this.orderBeforeDrag = this._ids();
                 }.bind(this),
@@ -49,7 +55,26 @@ define([
             this.element.on('change', '[data-action=pin]', this._pin.bind(this));
             this.element.on('click', '[data-action=delete]', this._delete.bind(this));
             this.element.on('submit', '[data-role=add-form]', this._add.bind(this));
+            $(document).on('brocodeQuickLinksReordered', function (event, ids) {
+                ids.forEach(function (id) {
+                    this.list.append(this.list.children('[data-link-id="' + id + '"]'));
+                }, this);
+                this._refresh();
+            }.bind(this));
             this._refresh();
+        },
+
+        /**
+         * A dragged table row loses its column widths; the copy keeps them.
+         */
+        _dragHelper: function (event, row) {
+            var helper = row.clone().addClass('_dragged');
+
+            helper.children().each(function (index) {
+                $(this).width(row.children().eq(index).width());
+            });
+
+            return helper;
         },
 
         _row: function (event) {
@@ -65,7 +90,7 @@ define([
         _move: function (direction, event) {
             var row = this._row(event),
                 before = this._ids(),
-                sibling = direction < 0 ? row.prev() : row.next();
+                sibling = direction < 0 ? row.prev('[data-link-id]') : row.next('[data-link-id]');
 
             if (!sibling.length) {
                 return;
@@ -83,12 +108,14 @@ define([
 
         _persistOrder: function (before) {
             this._refresh();
-            this._post(this.options.reorderUrl, {ids: this._ids()}).fail(function () {
-                before.forEach(function (id) {
-                    this.list.append(this.list.children('[data-link-id="' + id + '"]'));
-                }, this);
-                this._refresh();
-            }.bind(this));
+            this._post(this.options.reorderUrl, {ids: this._ids()})
+                .done(this._announce.bind(this))
+                .fail(function () {
+                    before.forEach(function (id) {
+                        this.list.append(this.list.children('[data-link-id="' + id + '"]'));
+                    }, this);
+                    this._refresh();
+                }.bind(this));
         },
 
         _startEdit: function (event) {
@@ -135,10 +162,16 @@ define([
 
             this._post(this.options.saveUrl, data).done(function (response) {
                 row.find('[data-role=label-link]').text(response.link.label).attr('href', response.link.href);
-                row.find('[data-role=url-value]').text(response.link.url);
                 row.find('[data-role=edit] input[name=label]').val(response.link.label);
-                urlInput.val(response.link.url);
+
+                // Only an external link's URL can change; an internal one is shown decoded
+                if (urlInput.length) {
+                    row.find('[data-role=url-value]').text(response.link.url);
+                    row.find('[data-role=url-text]').attr('title', response.link.url);
+                    urlInput.val(response.link.url);
+                }
                 this._endEdit(row);
+                this._announce();
             }.bind(this));
         },
 
@@ -147,6 +180,7 @@ define([
                 pinned = checkbox.prop('checked');
 
             this._post(this.options.saveUrl, {id: this._row(event).attr('data-link-id'), pinned: pinned ? 1 : 0})
+                .done(this._announce.bind(this))
                 .fail(function () {
                     checkbox.prop('checked', !pinned);
                 });
@@ -163,6 +197,7 @@ define([
                         self._post(self.options.deleteUrl, {id: row.attr('data-link-id')}).done(function () {
                             row.remove();
                             self._refresh();
+                            self._announce();
                         });
                     }
                 }
@@ -179,6 +214,26 @@ define([
             }).done(function () {
                 window.location.reload();
             });
+        },
+
+        /**
+         * The list as the header widget renders it: all links, in order.
+         */
+        _announce: function () {
+            var links = this.list.children('[data-link-id]').map(function () {
+                var row = $(this),
+                    anchor = row.find('[data-role=label-link]');
+
+                return {
+                    id: row.attr('data-link-id'),
+                    label: anchor.text(),
+                    href: anchor.attr('href'),
+                    'is_external': row.attr('data-external') === '1',
+                    'is_pinned': row.find('[data-action=pin]').prop('checked')
+                };
+            }).get();
+
+            $(document).trigger('brocodeQuickLinksChanged', [links]);
         },
 
         /**

@@ -48,6 +48,13 @@ class LinkUrl
 {
     public const MAX_LENGTH = 2048;
 
+    /**
+     * Query parameter holding a grid's saved filters and search keyword as canonical JSON.
+     * Written and applied by view/adminhtml/web/js/grid-state.js: grid filters live in the
+     * user's UI bookmarks, not in the URL, so the link has to carry them itself.
+     */
+    public const GRID_STATE_PARAM = 'ql_state';
+
     private const ALLOWED_SCHEMES = ['http', 'https'];
     private const DROPPED_PARAMS = ['key', 'form_key'];
     private const DEFAULT_PATH = 'adminhtml/dashboard/index';
@@ -118,6 +125,24 @@ class LinkUrl
         }
 
         return (string)$this->backendUrl->getUrl($path, $params);
+    }
+
+    /**
+     * Splits a stored internal URL into the URL without its saved grid state, and that state.
+     *
+     * @return array{0: string, 1: string|null}
+     */
+    public function splitGridState(string $url): array
+    {
+        [$path, $query] = array_pad(explode('?', $url, 2), 2, '');
+        parse_str($query, $params);
+        $state = $params[self::GRID_STATE_PARAM] ?? null;
+        unset($params[self::GRID_STATE_PARAM]);
+
+        return [
+            $path . ($params === [] ? '' : '?' . http_build_query($params)),
+            is_string($state) ? $state : null,
+        ];
     }
 
     /**

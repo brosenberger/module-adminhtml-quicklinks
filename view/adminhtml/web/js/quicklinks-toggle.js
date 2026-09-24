@@ -8,14 +8,23 @@
  */
 define([
     'jquery',
+    'underscore',
+    'uiRegistry',
     'mage/translate',
-    'Magento_Ui/js/modal/alert'
-], function ($, $t, alert) {
+    'Magento_Ui/js/modal/alert',
+    'BroCode_AdminhtmlQuickLinks/js/grid-state',
+    'jquery/ui-modules/widgets/sortable'
+], function ($, _, registry, $t, alert, gridState) {
     'use strict';
 
     /**
      * Header star: adds the current page as a pinned quick link, or removes it again.
-     * The pinned chips live in a separate header row, so they are looked up by selector.
+     * The pinned chips live in a separate header row, so they are looked up by selector;
+     * they can be dragged into a new order.
+     *
+     * On a grid page the link carries the grid's filters and keyword (see grid-state.js),
+     * and the star is filled only while the grid shows exactly the state of one of the
+     * links to this page.
      *
      * When Magento's page actions bar turns sticky on scroll (mage/backend/floating-header
      * adds `_fixed`), a copy of the chips is placed into it, between title and buttons.
@@ -25,24 +34,133 @@ define([
      * Pages without that bar (invoice grids, reports, ...) get a bar of their own, built
      * from the same core markup so core's CSS styles it identically, and shown only
      * while the header chip row is scrolled out of view.
+     *
+     * The manage page announces its changes with a `brocodeQuickLinksChanged` event on
+     * document; the chips are rebuilt from it without a reload.
      */
     $.widget('brocode.quickLinksToggle', {
         options: {
             saveUrl: '',
             deleteUrl: '',
-            currentLinkId: null
+            reorderUrl: '',
+            pageLinks: [],
+            order: [],
+            stateParam: 'ql_state'
         },
 
         _create: function () {
             this.star = this.element.find('[data-role=quicklinks-star]');
             this.bar = $('[data-role=quicklinks-bar]');
+            this.menu = this.element.find('[data-role=quicklinks-overflow]');
+            this.pageLinks = this.options.pageLinks.slice();
+            this.order = this.options.order.map(String);
             this.star.on('click', this._toggle.bind(this));
+            this._initSortable();
+            this._initGrid();
+            $(document).on('brocodeQuickLinksChanged', function (event, links) {
+                this._rebuild(links);
+            }.bind(this));
             // Deferred a frame: floating-header sets `_fixed` in its own scroll handler,
             // which may run after this one.
             $(window).on('scroll resize', function () {
                 window.requestAnimationFrame(this._syncSticky.bind(this));
             }.bind(this));
             window.requestAnimationFrame(this._syncSticky.bind(this));
+        },
+
+        /**
+         * Applies the grid state a link arrived with, then drops it from the address bar,
+         * so a reload keeps whatever the user changes afterwards.
+         */
+        _initGrid: function () {
+            var url = new URL(window.location.href),
+                state = url.searchParams.get(this.options.stateParam);
+
+            if (state) {
+                gridState.apply(state);
+                url.searchParams.delete(this.options.stateParam);
+                window.history.replaceState(window.history.state, '', url.toString());
+            }
+
+            gridState.onGrid(function (ns, filters) {
+                var search = registry.get('index = fulltext, ns = ' + ns),
+                    sync = _.debounce(this._syncStar.bind(this), 50);
+
+                this.ns = ns;
+                filters.on('applied', sync);
+
+                if (search) {
+                    search.on('value', sync);
+                }
+
+                sync();
+            }.bind(this));
+        },
+
+        _gridState: function () {
+            return this.ns ? gridState.serialize(this.ns) : null;
+        },
+
+        /**
+         * @returns {Object|undefined} the link to this page showing what is on screen
+         */
+        _currentLink: function () {
+            var state = this._gridState();
+
+            return _.find(this.pageLinks, function (link) {
+                return link.state === state;
+            });
+        },
+
+        _syncStar: function () {
+            this.star.attr('aria-pressed', this._currentLink() ? 'true' : 'false');
+        },
+
+        _initSortable: function () {
+            this.bar.sortable({
+                items: '> [data-link-id]',
+                // A clone, not the chip itself: sortable re-reads the first item's `float`
+                // on every move (see quicklinks.css), and a dragged original is absolutely
+                // positioned, which computes its float to none.
+                helper: 'clone',
+                distance: 5,
+                tolerance: 'pointer',
+                start: function () {
+                    this.orderBeforeDrag = this.order.slice();
+                }.bind(this),
+                update: this._persistChipOrder.bind(this)
+            });
+        },
+
+        /**
+         * The chips hold only the pinned links; the unpinned ones keep their positions in
+         * the full order, and the pinned positions are refilled in the dragged order.
+         */
+        _persistChipOrder: function () {
+            var before = this.orderBeforeDrag,
+                pinned = this._barIds(),
+                pinnedSet = _.object(pinned, pinned),
+                next = 0;
+
+            this.order = before.map(function (id) {
+                return _.has(pinnedSet, id) ? pinned[next++] : id;
+            });
+            this._chipsChanged();
+            this._post(this.options.reorderUrl, {ids: this.order}).done(function () {
+                $(document).trigger('brocodeQuickLinksReordered', [this.order.slice()]);
+            }.bind(this)).fail(function () {
+                this.order = before;
+                before.forEach(function (id) {
+                    this.bar.append(this.bar.children('[data-link-id="' + id + '"]'));
+                }, this);
+                this._chipsChanged();
+            }.bind(this));
+        },
+
+        _barIds: function () {
+            return this.bar.children('[data-link-id]').map(function () {
+                return $(this).attr('data-link-id');
+            }).get();
         },
 
         _syncSticky: function () {
@@ -62,8 +180,12 @@ define([
         },
 
         _addCopy: function (inner) {
+            var copy;
+
             if (inner.length && !inner.children('.brocode-quicklinks-sticky').length) {
-                inner.append(this.bar.clone().removeAttr('data-role').addClass('brocode-quicklinks-sticky'));
+                copy = this.bar.clone().removeAttr('data-role').addClass('brocode-quicklinks-sticky');
+                copy.removeClass('ui-sortable');
+                inner.append(copy);
             }
         },
 
@@ -96,40 +218,86 @@ define([
                 this.ownBar = null;
             }
 
+            this.bar.sortable('refresh');
             this._syncSticky();
         },
 
-        _toggle: function () {
-            var id = this.options.currentLinkId;
+        /**
+         * Rebuilds chips and dropdown from the manage page's list (in order, all links).
+         */
+        _rebuild: function (links) {
+            var ids = _.pluck(links, 'id').map(String);
 
-            if (id) {
-                this._post(this.options.deleteUrl, {id: id}).done(function () {
-                    this.element.add(this.bar).find('[data-link-id="' + id + '"]').remove();
-                    this._setCurrent(null);
+            this.order = ids;
+            this.pageLinks = this.pageLinks.filter(function (link) {
+                return ids.indexOf(String(link.id)) !== -1;
+            });
+            this.bar.children('[data-link-id]').remove();
+            this.menu.children('[data-link-id]').remove();
+            links.forEach(function (link) {
+                if (link.is_pinned) {
+                    this.bar.append(this._chip(link));
+                } else {
+                    this.menu.children('.brocode-quicklinks-manage').before(this._menuItem(link));
+                }
+            }, this);
+            this._syncStar();
+            this._chipsChanged();
+        },
+
+        _toggle: function () {
+            var current = this._currentLink(),
+                state = this._gridState();
+
+            if (current) {
+                this._post(this.options.deleteUrl, {id: current.id}).done(function () {
+                    $('[data-role=quicklinks-bar], [data-role=quicklinks-overflow]')
+                        .children('[data-link-id="' + current.id + '"]').remove();
+                    this.pageLinks = _.without(this.pageLinks, current);
+                    this.order = _.without(this.order, String(current.id));
+                    this._syncStar();
                     this._chipsChanged();
                 }.bind(this));
 
                 return;
             }
 
-            this._post(this.options.saveUrl, {url: window.location.href, label: this._pageLabel()})
+            this._post(this.options.saveUrl, {url: this._pageUrl(state), label: this._pageLabel(state)})
                 .done(function (response) {
                     this.bar.append(this._chip(response.link));
-                    this._setCurrent(response.link.id);
+                    this.pageLinks.push({id: response.link.id, state: state});
+                    this.order.push(String(response.link.id));
+                    this._syncStar();
                     this._chipsChanged();
                 }.bind(this));
         },
 
-        _setCurrent: function (id) {
-            this.options.currentLinkId = id;
-            this.star.attr('aria-pressed', id ? 'true' : 'false');
+        _pageUrl: function (state) {
+            var url = new URL(window.location.href);
+
+            url.searchParams.delete(this.options.stateParam);
+
+            if (state) {
+                url.searchParams.set(this.options.stateParam, state);
+            }
+
+            return url.toString();
         },
 
         /**
-         * "Orders / Operations / Sales / Magento Admin" -> "Orders"
+         * "Orders / Operations / Sales / Magento Admin" -> "Orders", plus what sets this
+         * page apart from others with the same title: "Orders: pending",
+         * "Configuration: Catalog" (config sections all share one title).
          */
-        _pageLabel: function () {
-            return document.title.split(' / ')[0].trim() || window.location.pathname;
+        _pageLabel: function (state) {
+            var title = document.title.split(' / ')[0].trim() || window.location.pathname,
+                detail = state ? gridState.summary(state) : '';
+
+            if (!detail && window.location.pathname.indexOf('/system_config/') !== -1) {
+                detail = $('.admin__page-nav-item._active').first().text().trim();
+            }
+
+            return detail ? title + ': ' + detail : title;
         },
 
         _chip: function (link) {
@@ -137,6 +305,20 @@ define([
                 .attr('href', link.href)
                 .attr('title', link.label)
                 .text(link.label);
+
+            if (link.is_external) {
+                anchor.addClass('_external').attr({target: '_blank', rel: 'noopener noreferrer'});
+            }
+
+            return $('<li class="brocode-quicklinks-item"></li>').attr('data-link-id', link.id).append(anchor);
+        },
+
+        _menuItem: function (link) {
+            var anchor = $('<a></a>').attr('href', link.href).text(link.label);
+
+            if (link.is_external) {
+                anchor.addClass('_external').attr({target: '_blank', rel: 'noopener noreferrer'});
+            }
 
             return $('<li class="brocode-quicklinks-item"></li>').attr('data-link-id', link.id).append(anchor);
         },

@@ -175,6 +175,38 @@ class LinkUrlTest extends TestCase
         self::assertSame('https://example.test/a', $this->linkUrl->toHref($this->link('https://example.test/a', true)));
     }
 
+    public function testSplitGridStateSeparatesSavedFiltersFromTheRestOfTheUrl(): void
+    {
+        $state = '{"f":{"status":"pending"},"ns":"sales_order_grid"}';
+
+        self::assertSame(
+            ['sales/order/index', $state],
+            $this->linkUrl->splitGridState('sales/order/index?' . http_build_query([LinkUrl::GRID_STATE_PARAM => $state]))
+        );
+        self::assertSame(
+            ['catalog/product/index?search=bag', $state],
+            $this->linkUrl->splitGridState(
+                'catalog/product/index?' . http_build_query(['search' => 'bag', LinkUrl::GRID_STATE_PARAM => $state])
+            )
+        );
+    }
+
+    public function testSplitGridStateWithoutSavedFilters(): void
+    {
+        self::assertSame(['sales/order/index', null], $this->linkUrl->splitGridState('sales/order/index'));
+        self::assertSame(['sales/order/index?a=1', null], $this->linkUrl->splitGridState('sales/order/index?a=1'));
+    }
+
+    public function testNormalizeKeepsSavedGridState(): void
+    {
+        $state = '{"f":{"status":"pending"},"ns":"sales_order_grid"}';
+        $result = $this->linkUrl->normalize(
+            'https://shop.example.test/admin/sales/order/index/key/abc/?' . http_build_query([LinkUrl::GRID_STATE_PARAM => $state])
+        );
+
+        self::assertSame(['sales/order/index', $state], $this->linkUrl->splitGridState($result['url']));
+    }
+
     private function link(string $url, bool $isExternal): QuickLinkInterface
     {
         $link = $this->createMock(QuickLinkInterface::class);

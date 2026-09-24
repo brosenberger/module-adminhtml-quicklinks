@@ -30,7 +30,6 @@ declare(strict_types=1);
 /** @var \BroCode\AdminhtmlQuickLinks\Block\Adminhtml\Header\QuickLinks $block */
 /** @var \Magento\Framework\Escaper $escaper */
 
-$currentLinkId = $block->getCurrentLinkId();
 $widgetInit = '{"BroCode_AdminhtmlQuickLinks/js/quicklinks-toggle":' . $block->getWidgetConfigJson() . '}';
 ?>
 <div class="brocode-quicklinks admin__action-dropdown-wrap"
@@ -38,7 +37,7 @@ $widgetInit = '{"BroCode_AdminhtmlQuickLinks/js/quicklinks-toggle":' . $block->g
     <button type="button"
             class="brocode-quicklinks-star"
             data-role="quicklinks-star"
-            aria-pressed="<?= $currentLinkId !== null ? 'true' : 'false' ?>"
+            aria-pressed="<?= $block->isCurrentPageLinked() ? 'true' : 'false' ?>"
             title="<?= $escaper->escapeHtmlAttr(__('Add or remove this page from your quick links')) ?>">
         <span class="brocode-quicklinks-star-icon" aria-hidden="true"></span>
         <span class="brocode-quicklinks-sr"><?= $escaper->escapeHtml(__('Quick link for this page')) ?></span>

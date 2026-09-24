@@ -28,10 +28,18 @@ the dashboard.
 - **A star in the admin header** favourites the page you are on, and clicking it again
   removes the page. A filled star means the current page is already a quick link. The
   label defaults to the page title ("Orders", "Products") and can be renamed later.
+  Configuration pages all share the title "Configuration", so their label adds the
+  section: "Configuration: Catalog".
+- **A starred grid keeps its filters and search keyword.** Magento stores a grid's
+  filters in the user's saved grid view, not in the URL, so a plain link to a filtered
+  grid opens it with whatever was used last. A quick link saved from a filtered grid
+  carries the filters and keyword itself ("Orders: pending") and applies them when it
+  is opened. Several links to one grid can coexist, one per filter set, and the star
+  is filled only while the grid shows exactly the filters of one of them.
 - **Pinned links show as buttons at the very top of every page**, above the page
   title, so each one is a single click away, with no dropdown to open first. They sit
   in the strip Magento reserves for system messages on every page; system messages,
-  when there are any, appear right below the chips.
+  when there are any, appear right below the chips. Drag a chip to change the order.
 
   That strip exists so the page doesn't jump when the messages box, which Magento
   draws after the page has rendered, appears. The chips keep that guarantee:
@@ -66,7 +74,9 @@ the dashboard.
 
 ![The star dropdown with unpinned links and the manage entry](docs/images/star-dropdown.png)
 
-- **System → Tools → Quick Links** is where the links are managed. You can:
+- **System → Tools → BroCode Quick Links** is where the links are managed, in a table
+  styled like Magento's own grids. Every change shows in the header chips on that page
+  right away, without a reload. You can:
   - reorder by drag and drop, or with the ▲/▼ buttons, which work from the keyboard too
   - rename a link
   - pin or unpin it
@@ -74,14 +84,14 @@ the dashboard.
   - add a custom link: any admin URL pasted from the address bar, or an external
     http(s) link (docs, a ticket board, a staging shop)
 
-![System → Tools → Quick Links](docs/images/manage-page.png)
+![System → Tools → BroCode Quick Links](docs/images/manage-page.png)
 
 - **External links can be edited in place**: both the label and the URL. Internal links
   let you edit the label only, because their target came from a real admin page.
 
 ![Editing an external link](docs/images/manage-edit.png)
 
-![The Quick Links entry under System → Tools](docs/images/menu-entry.png)
+![The BroCode Quick Links entry under System → Tools](docs/images/menu-entry.png)
 
 ## How the links survive a new login
 
@@ -130,6 +140,7 @@ Unit tests cover:
 - URL normalisation: key and frontName stripping, route-id mapping, query strings,
   rejected schemes, unknown admin routes
 - href rebuilding
+- splitting a link's saved grid filters from the rest of its URL
 - the repository: per-user scoping, append-on-create, reordering, validation
 
 Integration tests cover, against a real database:
@@ -151,7 +162,14 @@ A browser end-to-end run against 2.4.8-p5 (Playwright, custom admin frontName
 - following a chip after logging out and back in
 - adding external and pasted admin links
 - renaming and pinning
-- arrow and drag-and-drop reordering after a reload
+- arrow and drag-and-drop reordering after a reload, on the manage page and by
+  dragging the header chips, each side following the other without a reload
+- saving a filtered, keyword-searched order grid, and reopening it in a new session
+  with filters and keyword restored, whatever the grid showed before
+- the star following the grid: filled for a saved filter set, empty after the filters
+  change
+- a configuration section saved and reopened as "Configuration: Catalog"
+- header chips and dropdown following pin, unpin and reorder on the manage page
 - the chips in Magento's sticky action bar: bar height unchanged, no overlap with the
   buttons, and kept in sync when the star adds or removes a link
 - the module's own bar on a page without an action bar: shown only while the chip

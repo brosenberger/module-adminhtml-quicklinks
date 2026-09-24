@@ -97,6 +97,15 @@ class Manage extends Template
         return $this->linkUrl->toHref($link);
     }
 
+    /**
+     * The stored URL as a person reads it: an internal link's saved grid filters are
+     * URL-encoded JSON, shown decoded.
+     */
+    public function getDisplayUrl(QuickLinkInterface $link): string
+    {
+        return $link->isExternal() ? $link->getUrl() : urldecode($link->getUrl());
+    }
+
     public function getWidgetConfigJson(): string
     {
         return (string)$this->json->serialize([

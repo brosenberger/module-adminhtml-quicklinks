@@ -38,67 +38,95 @@ $widgetInit = '{"BroCode_AdminhtmlQuickLinks/js/manage":' . $block->getWidgetCon
         <?= $escaper->escapeHtml(__('Click the star in the admin header on any page to add it here. Pinned links show as buttons in the header, the others in the star dropdown. Drag a row, or use the arrows, to change the order.')) ?>
     </p>
 
-    <p class="brocode-ql-empty" data-role="empty"<?= $links === [] ? '' : ' hidden' ?>>
-        <?= $escaper->escapeHtml(__('You have no quick links yet.')) ?>
-    </p>
-
-    <ol class="brocode-ql-list" data-role="quicklinks-list">
-        <?php foreach ($links as $link): ?>
-            <li class="brocode-ql-row" data-link-id="<?= (int)$link->getLinkId() ?>"
-                data-external="<?= $link->isExternal() ? '1' : '0' ?>">
-                <span class="brocode-ql-handle" data-role="drag-handle"
-                      title="<?= $escaper->escapeHtmlAttr(__('Drag to reorder')) ?>" aria-hidden="true"></span>
-                <span class="brocode-ql-move">
-                    <button type="button" class="action-default" data-action="up"
-                            aria-label="<?= $escaper->escapeHtmlAttr(__('Move up')) ?>">&#9650;</button>
-                    <button type="button" class="action-default" data-action="down"
-                            aria-label="<?= $escaper->escapeHtmlAttr(__('Move down')) ?>">&#9660;</button>
-                </span>
-                <div class="brocode-ql-view" data-role="view">
-                    <a class="brocode-ql-label" data-role="label-link"
-                       href="<?= $escaper->escapeUrl($block->getHref($link)) ?>"
-                        <?php if ($link->isExternal()): ?>
-                            target="_blank" rel="noopener noreferrer"
-                        <?php endif; ?>
-                    ><?= $escaper->escapeHtml($link->getLabel()) ?></a>
-                    <span class="brocode-ql-url" data-role="url-text">
-                        <?php if ($link->isExternal()): ?>
-                            <span class="brocode-ql-badge"><?= $escaper->escapeHtml(__('External')) ?></span>
-                        <?php endif; ?>
-                        <span data-role="url-value"><?= $escaper->escapeHtml($link->getUrl()) ?></span>
-                    </span>
-                </div>
-                <div class="brocode-ql-edit" data-role="edit" hidden>
-                    <input type="text" class="admin__control-text" name="label" maxlength="255"
-                           aria-label="<?= $escaper->escapeHtmlAttr(__('Label')) ?>"
-                           value="<?= $escaper->escapeHtmlAttr($link->getLabel()) ?>"/>
-                    <?php if ($link->isExternal()): ?>
-                        <input type="url" class="admin__control-text" name="url" maxlength="2048"
-                               aria-label="<?= $escaper->escapeHtmlAttr(__('URL')) ?>"
-                               value="<?= $escaper->escapeHtmlAttr($link->getUrl()) ?>"/>
-                    <?php endif; ?>
-                    <button type="button" class="action-primary" data-action="save-edit">
-                        <?= $escaper->escapeHtml(__('Save')) ?>
-                    </button>
-                    <button type="button" class="action-default" data-action="cancel-edit">
-                        <?= $escaper->escapeHtml(__('Cancel')) ?>
-                    </button>
-                </div>
-                <label class="brocode-ql-pin">
-                    <input type="checkbox" data-action="pin"<?= $link->isPinned() ? ' checked' : '' ?>/>
-                    <?= $escaper->escapeHtml(__('Show in header')) ?>
-                </label>
-                <span class="brocode-ql-row-actions">
-                    <button type="button" class="action-default" data-action="edit">
-                        <?= $escaper->escapeHtml(__('Edit')) ?>
-                    </button>
-                    <button type="button" class="action-default" data-action="delete">
-                        <?= $escaper->escapeHtml(__('Delete')) ?>
-                    </button>
-                </span>
-            </li>
-        <?php endforeach; ?>
-    </ol>
+    <div class="admin__data-grid-wrap admin__data-grid-wrap-static brocode-ql-grid">
+        <table class="data-grid">
+            <thead>
+                <tr>
+                    <th class="data-grid-th data-grid-draggable-row-cell">
+                        <span class="brocode-quicklinks-sr"><?= $escaper->escapeHtml(__('Drag to reorder')) ?></span>
+                    </th>
+                    <th class="data-grid-th brocode-ql-col-move"><?= $escaper->escapeHtml(__('Order')) ?></th>
+                    <th class="data-grid-th brocode-ql-col-link"><?= $escaper->escapeHtml(__('Link')) ?></th>
+                    <th class="data-grid-th brocode-ql-col-pin"><?= $escaper->escapeHtml(__('Show in header')) ?></th>
+                    <th class="data-grid-th brocode-ql-col-actions"><?= $escaper->escapeHtml(__('Actions')) ?></th>
+                </tr>
+            </thead>
+            <tbody data-role="quicklinks-list">
+                <?php foreach ($links as $link): ?>
+                    <tr class="data-row" data-link-id="<?= (int)$link->getLinkId() ?>"
+                        data-external="<?= $link->isExternal() ? '1' : '0' ?>">
+                        <td class="data-grid-draggable-row-cell">
+                            <div class="draggable-handle" data-role="drag-handle"
+                                 title="<?= $escaper->escapeHtmlAttr(__('Drag to reorder')) ?>"></div>
+                        </td>
+                        <td class="brocode-ql-col-move">
+                            <span class="brocode-ql-move">
+                                <button type="button" class="action-default" data-action="up"
+                                        aria-label="<?= $escaper->escapeHtmlAttr(__('Move up')) ?>">&#9650;</button>
+                                <button type="button" class="action-default" data-action="down"
+                                        aria-label="<?= $escaper->escapeHtmlAttr(__('Move down')) ?>">&#9660;</button>
+                            </span>
+                        </td>
+                        <td class="brocode-ql-col-link">
+                            <div class="brocode-ql-view" data-role="view">
+                                <a class="brocode-ql-label" data-role="label-link"
+                                   href="<?= $escaper->escapeUrl($block->getHref($link)) ?>"
+                                    <?php if ($link->isExternal()): ?>
+                                        target="_blank" rel="noopener noreferrer"
+                                    <?php endif; ?>
+                                ><?= $escaper->escapeHtml($link->getLabel()) ?></a>
+                                <span class="brocode-ql-url" data-role="url-text"
+                                      title="<?= $escaper->escapeHtmlAttr($block->getDisplayUrl($link)) ?>">
+                                    <?php if ($link->isExternal()): ?>
+                                        <span class="brocode-ql-badge"><?= $escaper->escapeHtml(__('External')) ?></span>
+                                    <?php endif; ?>
+                                    <span data-role="url-value"><?= $escaper->escapeHtml($block->getDisplayUrl($link)) ?></span>
+                                </span>
+                            </div>
+                            <div class="brocode-ql-edit" data-role="edit" hidden>
+                                <input type="text" class="admin__control-text" name="label" maxlength="255"
+                                       aria-label="<?= $escaper->escapeHtmlAttr(__('Label')) ?>"
+                                       value="<?= $escaper->escapeHtmlAttr($link->getLabel()) ?>"/>
+                                <?php if ($link->isExternal()): ?>
+                                    <input type="url" class="admin__control-text" name="url" maxlength="2048"
+                                           aria-label="<?= $escaper->escapeHtmlAttr(__('URL')) ?>"
+                                           value="<?= $escaper->escapeHtmlAttr($link->getUrl()) ?>"/>
+                                <?php endif; ?>
+                                <button type="button" class="action-primary" data-action="save-edit">
+                                    <?= $escaper->escapeHtml(__('Save')) ?>
+                                </button>
+                                <button type="button" class="action-default" data-action="cancel-edit">
+                                    <?= $escaper->escapeHtml(__('Cancel')) ?>
+                                </button>
+                            </div>
+                        </td>
+                        <td class="brocode-ql-col-pin">
+                            <input type="checkbox" class="admin__control-checkbox" data-action="pin"
+                                   id="brocode-ql-pin-<?= (int)$link->getLinkId() ?>"
+                                <?= $link->isPinned() ? ' checked' : '' ?>/>
+                            <label class="admin__field-label" for="brocode-ql-pin-<?= (int)$link->getLinkId() ?>">
+                                <span class="brocode-quicklinks-sr"><?= $escaper->escapeHtml(__('Show in header')) ?></span>
+                            </label>
+                        </td>
+                        <td class="brocode-ql-col-actions">
+                            <button type="button" class="action-default" data-action="edit">
+                                <?= $escaper->escapeHtml(__('Edit')) ?>
+                            </button>
+                            <button type="button" class="action-default" data-action="delete">
+                                <?= $escaper->escapeHtml(__('Delete')) ?>
+                            </button>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+            <?php /* Own tbody: core's zebra stripes and bottom border count the link rows only */ ?>
+            <tbody data-role="empty"<?= $links === [] ? '' : ' hidden' ?>>
+                <tr class="data-grid-tr-no-data">
+                    <td colspan="5"><?= $escaper->escapeHtml(__('You have no quick links yet.')) ?></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 
     <form class="brocode-ql-add" data-role="add-form" novalidate>
         <h2 class="brocode-ql-add-title"><?= $escaper->escapeHtml(__('Add a custom link')) ?></h2>

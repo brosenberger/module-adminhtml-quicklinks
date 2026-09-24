@@ -48,6 +48,25 @@
     min-height: 10rem;
 }
 
+/* Chips can be dragged into a new order (see quicklinks-toggle.js). The float does
+   nothing to a flex item's layout; it is what makes jQuery UI sortable treat the chips
+   as a horizontal list, which it detects from `float` or an inline `display` only. */
+.brocode-quicklinks-bar > .brocode-quicklinks-item {
+    float: left;
+}
+
+.brocode-quicklinks-bar .ui-sortable-helper .brocode-quicklinks-chip {
+    border-color: #eb5202;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .2);
+    cursor: grabbing;
+}
+
+.brocode-quicklinks-bar .ui-sortable-placeholder {
+    visibility: visible !important;
+    border: 1px dashed #adadad;
+    border-radius: 1.6rem;
+}
+
 /* Copy of the chips inside Magento's sticky page actions bar, only while it is fixed.
    As a flex container it sits between the floated title and buttons and takes exactly
    the room left there. Zero height keeps the bar at its core height (title and buttons
@@ -207,45 +226,41 @@
     margin-bottom: 2rem;
 }
 
-.brocode-ql-list {
+/* The table is core's static data grid; these only size its columns */
+.brocode-ql-grid {
     max-width: 110rem;
     margin: 0 0 3rem;
-    padding: 0;
-    list-style: none;
-    border-top: 1px solid #e3e3e3;
 }
 
-.brocode-ql-row {
-    display: flex;
-    align-items: center;
-    gap: 1.2rem;
-    margin: 0;
-    padding: 1rem 1.2rem;
-    border-bottom: 1px solid #e3e3e3;
-    background: #fff;
+.brocode-ql-grid .data-grid td {
+    vertical-align: middle;
 }
 
-.brocode-ql-row.ui-sortable-helper {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, .2);
+.brocode-ql-grid .data-grid tbody[hidden] {
+    display: none;
 }
 
-.brocode-ql-row.ui-sortable-placeholder {
-    visibility: visible !important;
-    background: #fff9e6;
+.brocode-ql-grid .brocode-ql-col-move,
+.brocode-ql-grid .brocode-ql-col-pin,
+.brocode-ql-grid .brocode-ql-col-actions {
+    width: 1%;
+    white-space: nowrap;
 }
 
-.brocode-ql-handle {
-    flex: 0 0 auto;
-    width: 1.6rem;
-    cursor: grab;
-    color: #adadad;
-    font-size: 1.8rem;
-    line-height: 1;
+.brocode-ql-grid .brocode-ql-col-pin {
     text-align: center;
 }
 
-.brocode-ql-handle::before {
-    content: '\2630';
+/* Takes the remaining width without growing past it, so long URLs are cut off with an
+   ellipsis instead of widening the table */
+.brocode-ql-grid .brocode-ql-col-link {
+    width: 100%;
+    max-width: 0;
+}
+
+.brocode-ql-grid .data-grid tr.ui-sortable-placeholder td {
+    visibility: visible !important;
+    background: #fff9e6;
 }
 
 .brocode-ql-move {
@@ -258,12 +273,6 @@
     padding: .3rem .8rem;
     font-size: 1.1rem;
     line-height: 1.6rem;
-}
-
-.brocode-ql-view,
-.brocode-ql-edit {
-    flex: 1 1 auto;
-    min-width: 0;
 }
 
 .brocode-ql-view[hidden],
@@ -312,21 +321,6 @@
     flex: 1 1 30rem;
 }
 
-.brocode-ql-pin {
-    flex: 0 0 auto;
-    white-space: nowrap;
-}
-
-.brocode-ql-row-actions {
-    display: flex;
-    flex: 0 0 auto;
-    gap: .6rem;
-}
-
-.brocode-ql-empty[hidden] {
-    display: none;
-}
-
 .brocode-ql-add {
     max-width: 110rem;
 }
@@ -357,6 +351,6 @@
     font-size: 1.2rem;
 }
 
-.brocode-ql-row._editing [data-action='edit'] {
+.data-row._editing [data-action='edit'] {
     visibility: hidden;
 }

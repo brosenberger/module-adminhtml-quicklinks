@@ -84,6 +84,11 @@ class QuickLinks extends Template
      */
     private $links;
 
+    /**
+     * @var array<int, array{id: int, state: string|null}>|null
+     */
+    private $pageLinks;
+
     public function __construct(
         Context $context,
         QuickLinkRepositoryInterface $repository,
@@ -136,23 +141,51 @@ class QuickLinks extends Template
     }
 
     /**
-     * Id of the link that points at the page being rendered, for the filled star.
+     * The links pointing at the page being rendered, each with its saved grid state.
+     *
+     * Grid filters live in UI bookmarks, not in the URL, so the server cannot tell which of
+     * several links to the same grid matches what is on screen; the star widget compares
+     * the states with the grid's live filters (see js/grid-state.js).
+     *
+     * @return array<int, array{id: int, state: string|null}>
      */
-    public function getCurrentLinkId(): ?int
+    public function getPageLinks(): array
     {
+        if ($this->pageLinks !== null) {
+            return $this->pageLinks;
+        }
+
+        $this->pageLinks = [];
         try {
             $current = $this->linkUrl->normalize($this->_urlBuilder->getCurrentUrl());
         } catch (LocalizedException $e) {
-            return null;
+            return $this->pageLinks;
         }
 
+        [$currentBase] = $this->linkUrl->splitGridState($current['url']);
         foreach ($this->getLinks() as $link) {
-            if (!$link->isExternal() && $link->getUrl() === $current['url']) {
-                return $link->getLinkId();
+            [$base, $state] = $this->linkUrl->splitGridState($link->getUrl());
+            if (!$link->isExternal() && $base === $currentBase) {
+                $this->pageLinks[] = ['id' => (int)$link->getLinkId(), 'state' => $state];
             }
         }
 
-        return null;
+        return $this->pageLinks;
+    }
+
+    /**
+     * Server-side guess for the star before the grid has loaded: a link without saved
+     * filters. The widget corrects it once the grid's filters are known.
+     */
+    public function isCurrentPageLinked(): bool
+    {
+        foreach ($this->getPageLinks() as $pageLink) {
+            if ($pageLink['state'] === null) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function getManageUrl(): string
@@ -165,7 +198,12 @@ class QuickLinks extends Template
         return (string)$this->json->serialize([
             'saveUrl' => $this->getUrl('brocode_quicklinks/link/save'),
             'deleteUrl' => $this->getUrl('brocode_quicklinks/link/delete'),
-            'currentLinkId' => $this->getCurrentLinkId(),
+            'reorderUrl' => $this->getUrl('brocode_quicklinks/link/reorder'),
+            'pageLinks' => $this->getPageLinks(),
+            'order' => array_map(static function (QuickLinkInterface $link): int {
+                return (int)$link->getLinkId();
+            }, $this->getLinks()),
+            'stateParam' => LinkUrl::GRID_STATE_PARAM,
         ]);
     }
 
