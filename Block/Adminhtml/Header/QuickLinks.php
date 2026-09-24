@@ -175,7 +175,8 @@ class QuickLinks extends Template
 
     /**
      * Server-side guess for the star before the grid has loaded: a link without saved
-     * filters. The widget corrects it once the grid's filters are known.
+     * filters. The widget corrects it once the grid's filters are known (a link without
+     * any state does not count on a grid page there).
      */
     public function isCurrentPageLinked(): bool
     {

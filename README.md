@@ -39,7 +39,8 @@ the dashboard.
   This works for every grid built on Magento's UI listing component. Several links to
   one grid can coexist, one per filter set, and the star is filled only while the grid
   shows exactly the filters of one of them. Links saved before grid states were
-  recorded, and custom links added by URL, open the grid as it was last used.
+  recorded, and custom links added by URL, open the grid as it was last used; on a
+  grid they never fill the star, so the unfiltered view can still be starred.
 - **Pinned links show as buttons at the very top of every page**, above the page
   title, so each one is a single click away, with no dropdown to open first. They sit
   in the strip Magento reserves for system messages on every page; system messages,
@@ -173,8 +174,9 @@ A browser end-to-end run against 2.4.8-p5 (Playwright, custom admin frontName
   with filters and keyword restored, whatever the grid showed before
 - the star following the grid: filled for a saved filter set, empty after the filters
   change
-- an unfiltered grid link resetting filters and keyword left by a filtered one, and a
-  link without saved state still marking its unfiltered grid
+- an unfiltered grid link resetting filters and keyword left by a filtered one
+- a link without saved state leaving the star empty on its grid, so the unfiltered
+  view can be starred as its own link
 - a configuration section saved and reopened as "Configuration: Catalog"
 - header chips and dropdown following pin, unpin and reorder on the manage page
 - the chips in Magento's sticky action bar: bar height unchanged, no overlap with the

@@ -127,16 +127,6 @@ define([
         },
 
         /**
-         * Whether a saved state (or none, see LinkUrl::isUnfilteredGridState()) shows the
-         * grid without filters and keyword.
-         */
-        isUnfiltered: function (serialized) {
-            var state = serialized ? JSON.parse(serialized) : {};
-
-            return _.isEmpty(state.f) && !state.s;
-        },
-
-        /**
          * A short, human-readable version for a link label: "pending, Veronica"; empty
          * for an unfiltered grid.
          */
