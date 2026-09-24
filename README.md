@@ -29,12 +29,15 @@ the dashboard.
   removes the page. A filled star means the current page is already a quick link. The
   label defaults to the page title ("Orders", "Products") and can be renamed later.
   Configuration pages all share the title "Configuration", so their label adds the
-  section: "Configuration: Catalog".
+  section, and the scope when it isn't the default: "Configuration: Catalog",
+  "Configuration: Payment Methods (Second Website)". The scope is part of the link, so
+  it reopens the section at that website or store view.
 - **A starred grid keeps its filters and search keyword.** Magento stores a grid's
   filters in the user's saved grid view, not in the URL, so a plain link to a filtered
   grid opens it with whatever was used last. A quick link saved from a filtered grid
-  carries the filters and keyword itself ("Orders: pending") and applies them when it
-  is opened. A link saved from an unfiltered grid clears the grid's filters and keyword
+  carries the filters and keyword itself and applies them when it is opened. Its label
+  uses the text of the grid's own filter chips, so a website filter reads "Customers:
+  Second Website", not the website id. A link saved from an unfiltered grid clears the grid's filters and keyword
   when opened, so "Orders" always shows all orders, whatever filter was used last.
   This works for every grid built on Magento's UI listing component. Several links to
   one grid can coexist, one per filter set, and the star is filled only while the grid
@@ -177,7 +180,12 @@ A browser end-to-end run against 2.4.8-p5 (Playwright, custom admin frontName
 - an unfiltered grid link resetting filters and keyword left by a filtered one
 - a link without saved state leaving the star empty on its grid, so the unfiltered
   view can be starred as its own link
-- a configuration section saved and reopened as "Configuration: Catalog"
+- a configuration section saved and reopened as "Configuration: Catalog", and a
+  website-scoped section saved as "Configuration: Payment Methods (Second Website)" and
+  reopened at that scope after a new login
+- a website-filtered customer grid labelled "Customers: Second Website"
+- filters and keyword applied even when the grid's saved views load late (forced with
+  a delayed bookmarks script)
 - header chips and dropdown following pin, unpin and reorder on the manage page
 - the chips in Magento's sticky action bar: bar height unchanged, no overlap with the
   buttons, and kept in sync when the star adds or removes a link

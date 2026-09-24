@@ -265,7 +265,7 @@ define([
                 return;
             }
 
-            this._post(this.options.saveUrl, {url: this._pageUrl(state), label: this._pageLabel(state)})
+            this._post(this.options.saveUrl, {url: this._pageUrl(state), label: this._pageLabel()})
                 .done(function (response) {
                     this.bar.append(this._chip(response.link));
                     this.pageLinks.push({id: response.link.id, state: state});
@@ -289,15 +289,21 @@ define([
 
         /**
          * "Orders / Operations / Sales / Magento Admin" -> "Orders", plus what sets this
-         * page apart from others with the same title: "Orders: pending",
-         * "Configuration: Catalog" (config sections all share one title).
+         * page apart from others with the same title: "Orders: Pending", "Customers: Second
+         * Website", "Configuration: Catalog" (config sections all share one title), and a
+         * config scope other than default: "Configuration: Payment Methods (Second Website)".
          */
-        _pageLabel: function (state) {
+        _pageLabel: function () {
             var title = document.title.split(' / ')[0].trim() || window.location.pathname,
-                detail = state ? gridState.summary(state) : '';
+                path = window.location.pathname,
+                detail = this.ns ? gridState.describe(this.ns) : '';
 
-            if (!detail && window.location.pathname.indexOf('/system_config/') !== -1) {
+            if (!detail && path.indexOf('/system_config/') !== -1) {
                 detail = $('.admin__page-nav-item._active').first().text().trim();
+
+                if (/\/(website|store)\/\d+/.test(path)) {
+                    detail += ' (' + $('#store-change-button').first().text().trim() + ')';
+                }
             }
 
             return detail ? title + ': ' + detail : title;

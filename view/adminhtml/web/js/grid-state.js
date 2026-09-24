@@ -69,21 +69,34 @@ define([
     }
 
     /**
-     * Bookmarks restore the user's saved grid view after the filters exist; applying
-     * before that would be overwritten. Same wait as core's url-filter-applier.
+     * Waits until the bookmarks hold the user's saved views. Same wait as core's
+     * url-filter-applier.
      */
-    function whenRestored(ns, callback, tries) {
-        var bookmarks = registry.get('componentType = bookmark, ns = ' + ns);
-
-        if (bookmarks && !_.size(bookmarks.getViewData(bookmarks.defaultIndex)) && tries > 0) {
+    function whenRestored(bookmarks, callback, tries) {
+        if (!_.size(bookmarks.getViewData(bookmarks.defaultIndex)) && tries > 0) {
             setTimeout(function () {
-                whenRestored(ns, callback, tries - 1);
+                whenRestored(bookmarks, callback, tries - 1);
             }, BOOKMARK_WAIT_MS);
 
             return;
         }
 
         callback();
+    }
+
+    /**
+     * For a grid without bookmarks. The keyword goes first, since changing it resets the
+     * filters, and an empty keyword needs clear(): core's apply('') falls back to the text
+     * still in the search box.
+     */
+    function applyDirectly(filters, search, state, applied) {
+        if (search && state.s && search.value !== state.s) {
+            search.apply(state.s);
+        } else if (search && !state.s && search.value) {
+            search.clear();
+        }
+
+        filters.set('applied', applied);
     }
 
     return {
@@ -127,28 +140,28 @@ define([
         },
 
         /**
-         * A short, human-readable version for a link label: "pending, Veronica"; empty
-         * for an unfiltered grid.
+         * The grid's active filters and keyword as the grid itself shows them in its filter
+         * chips, for a link label: "Second Store View, 10 - ..., Pending, Veronica".
+         * Option labels, not stored values, so a website filter reads "Second Website", not "3".
          */
-        summary: function (serialized) {
-            var state = JSON.parse(serialized),
-                parts = _.map(state.f || {}, function (value) {
-                    if (Array.isArray(value)) {
-                        return value.join('/');
+        describe: function (ns) {
+            var filters = filtersOf(ns),
+                search = searchOf(ns),
+                parts = _.map(filters ? filters.previews : [], function (item) {
+                    var preview = item.preview;
+
+                    if (Array.isArray(preview)) {
+                        return (preview[0] || '...') + ' - ' + (preview[1] || '...');
                     }
 
-                    if (value && typeof value === 'object') {
-                        return _.compact([value.from, value.to]).join('–');
-                    }
-
-                    return String(value);
+                    return String(preview).trim();
                 });
 
-            if (state.s) {
-                parts.push(state.s);
+            if (search && search.value) {
+                parts.push(search.value);
             }
 
-            return parts.join(', ');
+            return _.compact(parts).join(', ');
         },
 
         /**
@@ -157,9 +170,9 @@ define([
          * With bookmarks the state is written into the current view: filters and search
          * import it through their statefull links, also a link that is only set up after
          * this runs (the search box's often is, and would otherwise pull the old keyword
-         * back in). Grids without bookmarks get the values set directly; the keyword goes
-         * first there, since changing it resets the filters, and an empty keyword needs
-         * clear(): core's apply('') falls back to the text still in the search box.
+         * back in). The bookmarks are waited for through the filters' own storage
+         * provider: they can register after the filters, and restoring the saved view
+         * then would overwrite a state written earlier.
          */
         apply: function (serialized) {
             var state;
@@ -175,26 +188,21 @@ define([
             }
 
             registry.get('componentType = filters, ns = ' + state.ns, function (filters) {
-                whenRestored(state.ns, function () {
-                    var bookmarks = registry.get('componentType = bookmark, ns = ' + state.ns),
-                        applied = $.extend({placeholder: true}, state.f || {}),
-                        search = searchOf(state.ns);
+                var provider = filters.storageConfig && filters.storageConfig.provider,
+                    applied = $.extend({placeholder: true}, state.f || {});
 
-                    if (bookmarks) {
+                if (!provider || provider === 'localStorage') {
+                    applyDirectly(filters, searchOf(state.ns), state, applied);
+
+                    return;
+                }
+
+                registry.get(provider, function (bookmarks) {
+                    whenRestored(bookmarks, function () {
                         bookmarks.set('current.search.value', state.s || '');
                         bookmarks.set('current.filters.applied', applied);
-
-                        return;
-                    }
-
-                    if (search && state.s && search.value !== state.s) {
-                        search.apply(state.s);
-                    } else if (search && !state.s && search.value) {
-                        search.clear();
-                    }
-
-                    filters.set('applied', applied);
-                }, BOOKMARK_WAIT_TRIES);
+                    }, BOOKMARK_WAIT_TRIES);
+                });
             });
         }
     };
