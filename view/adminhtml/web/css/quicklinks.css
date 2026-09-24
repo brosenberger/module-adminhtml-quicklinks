@@ -66,6 +66,21 @@
     pointer-events: none;
 }
 
+/* Our own bar, for pages without core's (see quicklinks-toggle.js). Core styles it;
+   this only undoes the in-flow wrapper's margin and matches the height core's bar gets
+   from its buttons. */
+.page-main-actions.brocode-quicklinks-fixedbar {
+    margin: 0;
+}
+
+.page-main-actions.brocode-quicklinks-fixedbar[hidden] {
+    display: none;
+}
+
+.brocode-quicklinks-fixedbar .page-actions-inner {
+    min-height: 4.6rem;
+}
+
 .brocode-quicklinks-sticky .brocode-quicklinks-item {
     flex: 0 0 auto;
 }

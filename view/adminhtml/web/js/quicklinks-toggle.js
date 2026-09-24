@@ -21,6 +21,10 @@ define([
      * adds `_fixed`), a copy of the chips is placed into it, between title and buttons.
      * The copy is made lazily at that moment because floating-header rebuilds the bar's
      * markup on init, and is only shown while the bar is fixed (see quicklinks.css).
+     *
+     * Pages without that bar (invoice grids, reports, ...) get a bar of their own, built
+     * from the same core markup so core's CSS styles it identically, and shown only
+     * while the header chip row is scrolled out of view.
      */
     $.widget('brocode.quickLinksToggle', {
         options: {
@@ -38,18 +42,60 @@ define([
             $(window).on('scroll resize', function () {
                 window.requestAnimationFrame(this._syncSticky.bind(this));
             }.bind(this));
+            window.requestAnimationFrame(this._syncSticky.bind(this));
         },
 
         _syncSticky: function () {
-            var inner = $('.page-actions._fixed .page-actions-inner');
+            var coreInner = $('.page-actions-inner').filter(function () {
+                return !$(this).closest('.brocode-quicklinks-fixedbar').length;
+            });
 
+            if (coreInner.length) {
+                this._addCopy(coreInner.filter(function () {
+                    return $(this).parent().hasClass('_fixed');
+                }));
+
+                return;
+            }
+
+            this._syncOwnBar();
+        },
+
+        _addCopy: function (inner) {
             if (inner.length && !inner.children('.brocode-quicklinks-sticky').length) {
                 inner.append(this.bar.clone().removeAttr('data-role').addClass('brocode-quicklinks-sticky'));
             }
         },
 
+        _syncOwnBar: function () {
+            var show = this.bar.children().length > 0 && this.bar[0].getBoundingClientRect().bottom < 0;
+
+            if (show && !this.ownBar) {
+                // `_hidden` on the wrapper is core's own "the bar is fixed" state: it drops the
+                // wrapper's background and padding, leaving only the fixed .page-actions.
+                this.ownBar = $(
+                    '<div class="page-main-actions _hidden brocode-quicklinks-fixedbar" hidden>' +
+                    '<div class="page-actions _fixed"><div class="page-actions-inner"></div></div></div>'
+                );
+                this.ownBar.find('.page-actions-inner')
+                    .attr('data-title', $('.page-title-wrapper .page-title').first().text().trim());
+                $('body').append(this.ownBar);
+                this._addCopy(this.ownBar.find('.page-actions-inner'));
+            }
+
+            if (this.ownBar) {
+                this.ownBar.prop('hidden', !show);
+            }
+        },
+
         _chipsChanged: function () {
             $('.brocode-quicklinks-sticky').remove();
+
+            if (this.ownBar) {
+                this.ownBar.remove();
+                this.ownBar = null;
+            }
+
             this._syncSticky();
         },
 

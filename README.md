@@ -30,12 +30,20 @@ the dashboard.
   label defaults to the page title ("Orders", "Products") and can be renamed later.
 - **Pinned links show as buttons in the first row of the header**, above the page
   title, so each one is a single click away, with no dropdown to open first.
-- **They stay reachable while you scroll.** On pages with Magento's sticky action bar
-  (configuration, edit forms, most grids), the chips appear inside that bar, between
-  the page title and its buttons, once it turns sticky. Chips that don't fit are
-  cut off at the buttons and fade out; the bar keeps its normal height.
+- **They stay reachable while you scroll, on every page.**
+  - On pages with Magento's sticky action bar (configuration, edit forms, most grids),
+    the chips appear inside that bar, between the page title and its buttons, once it
+    turns sticky. Chips that don't fit are cut off at the buttons and fade out, and the
+    bar keeps its normal height.
+  - Pages without that bar (invoice, shipment and credit memo grids, reports, themes,
+    …) get a bar of their own: page title and chips. It appears once the chip row has
+    scrolled out of view, and it uses core's markup, so it looks like Magento's own.
+    It sits in the space Magento's sticky grid toolbars already leave free for core's
+    bar, so it doesn't cover them.
 
 ![Quick links inside the sticky action bar on a configuration page](docs/images/sticky-bar.png)
+
+![The quick-links bar on a page without an action bar (Sales → Invoices)](docs/images/sticky-own-bar.png)
 
 - **Unpinned links go into the dropdown next to the star.** Pinning is per link, so the
   daily pages stay visible and the occasional ones wait in the dropdown. The dropdown
@@ -93,9 +101,7 @@ runs on `backend`.
 
 - Sharing links between users, or setting them per role. Every list is personal.
 - A limit on the number of links. The header row wraps instead of hiding links; in
-  the sticky bar, links past the available width are cut off.
-- Sticky links on pages without Magento's action bar: there, the chips scroll away
-  with the header.
+  the sticky bars, links past the available width are cut off.
 
 ## Compatibility
 
@@ -130,6 +136,9 @@ A browser end-to-end run against 2.4.8-p5 (Playwright, custom admin frontName
 - adding external and pasted admin links
 - renaming and pinning
 - arrow and drag-and-drop reordering after a reload
-- the chip copy in the sticky action bar: bar height unchanged, no overlap with the
+- the chips in Magento's sticky action bar: bar height unchanged, no overlap with the
   buttons, and kept in sync when the star adds or removes a link
+- the module's own bar on a page without an action bar: shown only while the chip
+  row is out of view, kept in sync with the star, and never created on pages that
+  have Magento's bar
 - rejection of `javascript:` URLs, cross-user writes and requests without a form key
