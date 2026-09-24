@@ -3,6 +3,8 @@
 Personal quick links for Magento 2 admin users. Star any backend page, and it sits one
 click away in the admin header on every page after that.
 
+**Module page:** [brocode.at/modules/module-adminhtml-quicklinks/](https://brocode.at/modules/module-adminhtml-quicklinks/)
+
 ```bash
 composer require brocode/module-adminhtml-quicklinks
 bin/magento module:enable BroCode_AdminhtmlQuickLinks
