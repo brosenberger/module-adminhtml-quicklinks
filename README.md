@@ -33,6 +33,17 @@ the dashboard.
   in the strip Magento reserves for system messages on every page; system messages,
   when there are any, appear right below the chips.
 
+  That strip exists so the page doesn't jump when the messages box, which Magento
+  draws after the page has rendered, appears. The chips keep that guarantee:
+  - **No system messages:** nothing will load there, so the chips use the reserved
+    space.
+  - **A system message pending:** the space stays reserved below the chips. The
+    module checks this server-side on every page, after Magento's own messages
+    component has synced them, so it is exact even on the first page after a message
+    appears.
+  - The result: the header moves exactly as much as in core when a message appears,
+    and not at all when none does.
+
 ![Quick links above a system message](docs/images/header-with-messages.png)
 - **They stay reachable while you scroll, on every page.**
   - On pages with Magento's sticky action bar (configuration, edit forms, most grids),
@@ -125,6 +136,7 @@ Integration tests cover, against a real database:
 - per-user scoping
 - stored sort order
 - the cascade on admin-user deletion
+- detecting a pending system message, including the ACL case where none renders
 
 Run them from a Magento install that has the module under `app/code`:
 
@@ -145,4 +157,7 @@ A browser end-to-end run against 2.4.8-p5 (Playwright, custom admin frontName
 - the module's own bar on a page without an action bar: shown only while the chip
   row is out of view, kept in sync with the star, and never created on pages that
   have Magento's bar
+- no extra layout shift from the chips when a system message loads: header position
+  at DOM ready against the final render, with and without a pending message, compared
+  to the same page without links
 - rejection of `javascript:` URLs, cross-user writes and requests without a form key

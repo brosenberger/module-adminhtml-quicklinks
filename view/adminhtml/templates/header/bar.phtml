@@ -30,7 +30,8 @@ declare(strict_types=1);
 /** @var \BroCode\AdminhtmlQuickLinks\Block\Adminhtml\Header\QuickLinks $block */
 /** @var \Magento\Framework\Escaper $escaper */
 ?>
-<ul class="brocode-quicklinks-bar" data-role="quicklinks-bar">
+<ul class="brocode-quicklinks-bar<?= $block->isSystemMessageComing() ? ' _messages' : '' ?>"
+    data-role="quicklinks-bar">
     <?php foreach ($block->getPinnedLinks() as $link): ?>
         <li class="brocode-quicklinks-item" data-link-id="<?= (int)$link->getLinkId() ?>">
             <a class="brocode-quicklinks-chip<?= $link->isExternal() ? ' _external' : '' ?>"

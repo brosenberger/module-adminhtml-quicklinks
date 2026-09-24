@@ -32,6 +32,7 @@ namespace BroCode\AdminhtmlQuickLinks\Block\Adminhtml\Header;
 use BroCode\AdminhtmlQuickLinks\Api\Data\QuickLinkInterface;
 use BroCode\AdminhtmlQuickLinks\Api\QuickLinkRepositoryInterface;
 use BroCode\AdminhtmlQuickLinks\Model\LinkUrl;
+use BroCode\AdminhtmlQuickLinks\Model\PendingSystemMessages;
 use Magento\Backend\Block\Template;
 use Magento\Backend\Block\Template\Context;
 use Magento\Backend\Model\Auth\Session as AuthSession;
@@ -43,8 +44,8 @@ use Magento\Framework\Serialize\Serializer\Json;
  *
  * - `header/star.phtml` sits with the other header actions (search, notifications, user):
  *   the star toggle for the current page and the dropdown of unpinned links.
- * - `header/bar.phtml` holds the pinned links, first in the notices area above the
- *   header, where core reserves room for system messages (see default.xml).
+ * - `header/bar.phtml` holds the pinned links, shown first in the notices area above
+ *   the header, where core reserves room for system messages (see default.xml).
  */
 class QuickLinks extends Template
 {
@@ -74,6 +75,11 @@ class QuickLinks extends Template
     private $json;
 
     /**
+     * @var PendingSystemMessages
+     */
+    private $pendingSystemMessages;
+
+    /**
      * @var QuickLinkInterface[]|null
      */
     private $links;
@@ -84,6 +90,7 @@ class QuickLinks extends Template
         LinkUrl $linkUrl,
         AuthSession $authSession,
         Json $json,
+        PendingSystemMessages $pendingSystemMessages,
         array $data = []
     ) {
         parent::__construct($context, $data);
@@ -91,6 +98,7 @@ class QuickLinks extends Template
         $this->linkUrl = $linkUrl;
         $this->authSession = $authSession;
         $this->json = $json;
+        $this->pendingSystemMessages = $pendingSystemMessages;
     }
 
     /**
@@ -111,6 +119,15 @@ class QuickLinks extends Template
         return array_values(array_filter($this->getLinks(), static function (QuickLinkInterface $link): bool {
             return !$link->isPinned();
         }));
+    }
+
+    /**
+     * Whether core's system messages box is about to render below the chips, so its space
+     * must stay reserved. Only meaningful in the bar, which renders after that box.
+     */
+    public function isSystemMessageComing(): bool
+    {
+        return $this->pendingSystemMessages->exist();
     }
 
     public function getHref(QuickLinkInterface $link): string

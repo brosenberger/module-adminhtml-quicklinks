@@ -27,9 +27,25 @@
     list-style: none;
 }
 
-/* Centred in core's 5rem notices min-height; system messages, if any, follow below. */
+/* Centred in core's 5rem notices min-height. The bar renders after core's messages box
+   (see default.xml), so the column order puts it back on top. */
+.notices-wrapper:has(> .brocode-quicklinks-bar > li) {
+    display: flex;
+    flex-direction: column;
+}
+
+.notices-wrapper > .brocode-quicklinks-bar {
+    order: -1;
+}
+
 .brocode-quicklinks-bar:has(> li) {
     padding: 1rem 0;
+}
+
+/* A messages box is coming (drawn by knockout after first paint): keep core's 5rem for it
+   below the chips, so the page does not jump when it appears. */
+.notices-wrapper:has(> .brocode-quicklinks-bar._messages > li) {
+    min-height: 10rem;
 }
 
 /* Copy of the chips inside Magento's sticky page actions bar, only while it is fixed.
