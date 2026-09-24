@@ -180,7 +180,7 @@ class QuickLinks extends Template
     public function isCurrentPageLinked(): bool
     {
         foreach ($this->getPageLinks() as $pageLink) {
-            if ($pageLink['state'] === null) {
+            if ($this->linkUrl->isUnfilteredGridState($pageLink['state'])) {
                 return true;
             }
         }

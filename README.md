@@ -34,8 +34,12 @@ the dashboard.
   filters in the user's saved grid view, not in the URL, so a plain link to a filtered
   grid opens it with whatever was used last. A quick link saved from a filtered grid
   carries the filters and keyword itself ("Orders: pending") and applies them when it
-  is opened. Several links to one grid can coexist, one per filter set, and the star
-  is filled only while the grid shows exactly the filters of one of them.
+  is opened. A link saved from an unfiltered grid clears the grid's filters and keyword
+  when opened, so "Orders" always shows all orders, whatever filter was used last.
+  This works for every grid built on Magento's UI listing component. Several links to
+  one grid can coexist, one per filter set, and the star is filled only while the grid
+  shows exactly the filters of one of them. Links saved before grid states were
+  recorded, and custom links added by URL, open the grid as it was last used.
 - **Pinned links show as buttons at the very top of every page**, above the page
   title, so each one is a single click away, with no dropdown to open first. They sit
   in the strip Magento reserves for system messages on every page; system messages,
@@ -140,7 +144,8 @@ Unit tests cover:
 - URL normalisation: key and frontName stripping, route-id mapping, query strings,
   rejected schemes, unknown admin routes
 - href rebuilding
-- splitting a link's saved grid filters from the rest of its URL
+- splitting a link's saved grid filters from the rest of its URL, and recognising an
+  unfiltered state
 - the repository: per-user scoping, append-on-create, reordering, validation
 
 Integration tests cover, against a real database:
@@ -168,6 +173,8 @@ A browser end-to-end run against 2.4.8-p5 (Playwright, custom admin frontName
   with filters and keyword restored, whatever the grid showed before
 - the star following the grid: filled for a saved filter set, empty after the filters
   change
+- an unfiltered grid link resetting filters and keyword left by a filtered one, and a
+  link without saved state still marking its unfiltered grid
 - a configuration section saved and reopened as "Configuration: Catalog"
 - header chips and dropdown following pin, unpin and reorder on the manage page
 - the chips in Magento's sticky action bar: bar height unchanged, no overlap with the

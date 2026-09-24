@@ -19,7 +19,8 @@ define([
      * Grids keep that state in the user's UI bookmarks, not in the URL, so a plain link to
      * a filtered grid opens it unfiltered (or with whatever was used last). A quick link
      * stores the state as canonical JSON (`{"f": filters, "ns": namespace, "s": keyword}`)
-     * in its own query parameter and applies it here on arrival.
+     * in its own query parameter and applies it here on arrival. An unfiltered grid is
+     * saved as `{"ns": namespace}`, so its link opens the grid unfiltered again.
      *
      * Core's Magento_Ui/js/grid/url-filter-applier does the arrival half for flat values
      * only and merges into the current filters; a saved link has to replace them, ranges
@@ -96,7 +97,7 @@ define([
         },
 
         /**
-         * @returns {String|null} canonical JSON, or null for an unfiltered grid
+         * @returns {String|null} canonical JSON, or null when the page has no such grid
          */
         serialize: function (ns) {
             var filters = filtersOf(ns),
@@ -122,11 +123,22 @@ define([
                 state.s = search.value;
             }
 
-            return state.f || state.s ? JSON.stringify(canonical(state)) : null;
+            return JSON.stringify(canonical(state));
         },
 
         /**
-         * A short, human-readable version for a link label: "pending, Veronica".
+         * Whether a saved state (or none, see LinkUrl::isUnfilteredGridState()) shows the
+         * grid without filters and keyword.
+         */
+        isUnfiltered: function (serialized) {
+            var state = serialized ? JSON.parse(serialized) : {};
+
+            return _.isEmpty(state.f) && !state.s;
+        },
+
+        /**
+         * A short, human-readable version for a link label: "pending, Veronica"; empty
+         * for an unfiltered grid.
          */
         summary: function (serialized) {
             var state = JSON.parse(serialized),

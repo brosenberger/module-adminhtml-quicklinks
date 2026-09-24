@@ -197,6 +197,14 @@ class LinkUrlTest extends TestCase
         self::assertSame(['sales/order/index?a=1', null], $this->linkUrl->splitGridState('sales/order/index?a=1'));
     }
 
+    public function testGridStateWithoutFiltersOrKeywordIsUnfiltered(): void
+    {
+        self::assertTrue($this->linkUrl->isUnfilteredGridState(null));
+        self::assertTrue($this->linkUrl->isUnfilteredGridState('{"ns":"sales_order_grid"}'));
+        self::assertFalse($this->linkUrl->isUnfilteredGridState('{"f":{"status":"pending"},"ns":"sales_order_grid"}'));
+        self::assertFalse($this->linkUrl->isUnfilteredGridState('{"ns":"sales_order_grid","s":"Veronica"}'));
+    }
+
     public function testNormalizeKeepsSavedGridState(): void
     {
         $state = '{"f":{"status":"pending"},"ns":"sales_order_grid"}';

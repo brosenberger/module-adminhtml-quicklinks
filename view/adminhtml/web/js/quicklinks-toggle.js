@@ -102,14 +102,18 @@ define([
         },
 
         /**
-         * @returns {Object|undefined} the link to this page showing what is on screen
+         * @returns {Object|undefined} the link to this page showing what is on screen. A
+         *     link without any saved state (not saved from a grid, or before states were
+         *     saved) counts as showing the grid unfiltered.
          */
         _currentLink: function () {
             var state = this._gridState();
 
             return _.find(this.pageLinks, function (link) {
                 return link.state === state;
-            });
+            }) || (gridState.isUnfiltered(state) ? _.find(this.pageLinks, function (link) {
+                return link.state === null;
+            }) : undefined);
         },
 
         _syncStar: function () {

@@ -146,6 +146,22 @@ class LinkUrl
     }
 
     /**
+     * Whether a saved grid state shows the grid unfiltered: no state at all (a link to a
+     * page without a grid, or saved before states existed), or one with neither filters
+     * nor a keyword. See js/grid-state.js for the format.
+     */
+    public function isUnfilteredGridState(?string $state): bool
+    {
+        if ($state === null) {
+            return true;
+        }
+
+        $decoded = json_decode($state, true);
+
+        return is_array($decoded) && empty($decoded['f']) && empty($decoded['s']);
+    }
+
+    /**
      * The key-free route path for a URL inside this admin, or null for anything else.
      *
      * @param array<string, mixed> $parts result of parse_url()
