@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="brocode_adminhtml_quicklink" resource="default" engine="innodb" comment="Admin user quick links">
+        <column xsi:type="int" name="link_id" unsigned="true" nullable="false" identity="true" comment="Link ID"/>
+        <column xsi:type="int" name="user_id" unsigned="true" nullable="false" identity="false"
+                comment="Admin user ID"/>
+        <column xsi:type="varchar" name="label" nullable="false" length="255" comment="Label"/>
+        <column xsi:type="text" name="url" nullable="false"
+                comment="Key-free admin route path, or absolute URL for external links"/>
+        <column xsi:type="smallint" name="is_external" unsigned="true" nullable="false" identity="false"
+                default="0" comment="Is external URL"/>
+        <column xsi:type="smallint" name="is_pinned" unsigned="true" nullable="false" identity="false"
+                default="1" comment="Shown as chip in the admin header"/>
+        <column xsi:type="int" name="sort_order" unsigned="true" nullable="false" identity="false"
+                default="0" comment="Sort order"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false"
+                default="CURRENT_TIMESTAMP" comment="Created at"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="link_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="BROCODE_ADMINHTML_QUICKLINK_USER_ID_ADMIN_USER_USER_ID"
+                    table="brocode_adminhtml_quicklink" column="user_id"
+                    referenceTable="admin_user" referenceColumn="user_id" onDelete="CASCADE"/>
+        <index referenceId="BROCODE_ADMINHTML_QUICKLINK_USER_ID_SORT_ORDER" indexType="btree">
+            <column name="user_id"/>
+            <column name="sort_order"/>
+        </index>
+    </table>
+</schema>

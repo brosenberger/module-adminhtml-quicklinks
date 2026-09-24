@@ -1,0 +1,118 @@
+<?php
+/**
+ * Copyright (C) 2026 Benjamin Rosenberger <bensch.rosenberger@gmail.com>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ * @copyright 2026 Benjamin Rosenberger
+ * @author bensch.rosenberger@gmail.com
+ * @license MIT
+ * @link https://brocode.at
+ */
+declare(strict_types=1);
+
+/** @var \BroCode\AdminhtmlQuickLinks\Block\Adminhtml\Manage $block */
+/** @var \Magento\Framework\Escaper $escaper */
+
+$links = $block->getLinks();
+$widgetInit = '{"BroCode_AdminhtmlQuickLinks/js/manage":' . $block->getWidgetConfigJson() . '}';
+?>
+<div class="brocode-ql-manage" data-mage-init="<?= $escaper->escapeHtmlAttr($widgetInit) ?>">
+    <p class="brocode-ql-intro">
+        <?= $escaper->escapeHtml(__('Click the star in the admin header on any page to add it here. Pinned links show as buttons in the header, the others in the star dropdown. Drag a row, or use the arrows, to change the order.')) ?>
+    </p>
+
+    <p class="brocode-ql-empty" data-role="empty"<?= $links === [] ? '' : ' hidden' ?>>
+        <?= $escaper->escapeHtml(__('You have no quick links yet.')) ?>
+    </p>
+
+    <ol class="brocode-ql-list" data-role="quicklinks-list">
+        <?php foreach ($links as $link): ?>
+            <li class="brocode-ql-row" data-link-id="<?= (int)$link->getLinkId() ?>"
+                data-external="<?= $link->isExternal() ? '1' : '0' ?>">
+                <span class="brocode-ql-handle" data-role="drag-handle"
+                      title="<?= $escaper->escapeHtmlAttr(__('Drag to reorder')) ?>" aria-hidden="true"></span>
+                <span class="brocode-ql-move">
+                    <button type="button" class="action-default" data-action="up"
+                            aria-label="<?= $escaper->escapeHtmlAttr(__('Move up')) ?>">&#9650;</button>
+                    <button type="button" class="action-default" data-action="down"
+                            aria-label="<?= $escaper->escapeHtmlAttr(__('Move down')) ?>">&#9660;</button>
+                </span>
+                <div class="brocode-ql-view" data-role="view">
+                    <a class="brocode-ql-label" data-role="label-link"
+                       href="<?= $escaper->escapeUrl($block->getHref($link)) ?>"
+                        <?php if ($link->isExternal()): ?>
+                            target="_blank" rel="noopener noreferrer"
+                        <?php endif; ?>
+                    ><?= $escaper->escapeHtml($link->getLabel()) ?></a>
+                    <span class="brocode-ql-url" data-role="url-text">
+                        <?php if ($link->isExternal()): ?>
+                            <span class="brocode-ql-badge"><?= $escaper->escapeHtml(__('External')) ?></span>
+                        <?php endif; ?>
+                        <span data-role="url-value"><?= $escaper->escapeHtml($link->getUrl()) ?></span>
+                    </span>
+                </div>
+                <div class="brocode-ql-edit" data-role="edit" hidden>
+                    <input type="text" class="admin__control-text" name="label" maxlength="255"
+                           aria-label="<?= $escaper->escapeHtmlAttr(__('Label')) ?>"
+                           value="<?= $escaper->escapeHtmlAttr($link->getLabel()) ?>"/>
+                    <?php if ($link->isExternal()): ?>
+                        <input type="url" class="admin__control-text" name="url" maxlength="2048"
+                               aria-label="<?= $escaper->escapeHtmlAttr(__('URL')) ?>"
+                               value="<?= $escaper->escapeHtmlAttr($link->getUrl()) ?>"/>
+                    <?php endif; ?>
+                    <button type="button" class="action-primary" data-action="save-edit">
+                        <?= $escaper->escapeHtml(__('Save')) ?>
+                    </button>
+                    <button type="button" class="action-default" data-action="cancel-edit">
+                        <?= $escaper->escapeHtml(__('Cancel')) ?>
+                    </button>
+                </div>
+                <label class="brocode-ql-pin">
+                    <input type="checkbox" data-action="pin"<?= $link->isPinned() ? ' checked' : '' ?>/>
+                    <?= $escaper->escapeHtml(__('Show in header')) ?>
+                </label>
+                <span class="brocode-ql-row-actions">
+                    <button type="button" class="action-default" data-action="edit">
+                        <?= $escaper->escapeHtml(__('Edit')) ?>
+                    </button>
+                    <button type="button" class="action-default" data-action="delete">
+                        <?= $escaper->escapeHtml(__('Delete')) ?>
+                    </button>
+                </span>
+            </li>
+        <?php endforeach; ?>
+    </ol>
+
+    <form class="brocode-ql-add" data-role="add-form" novalidate>
+        <h2 class="brocode-ql-add-title"><?= $escaper->escapeHtml(__('Add a custom link')) ?></h2>
+        <div class="brocode-ql-add-fields">
+            <input type="text" class="admin__control-text" name="label" maxlength="255" required
+                   placeholder="<?= $escaper->escapeHtmlAttr(__('Label')) ?>"
+                   aria-label="<?= $escaper->escapeHtmlAttr(__('Label')) ?>"/>
+            <input type="url" class="admin__control-text" name="url" maxlength="2048" required
+                   placeholder="https://"
+                   aria-label="<?= $escaper->escapeHtmlAttr(__('URL')) ?>"/>
+            <button type="submit" class="action-primary"><?= $escaper->escapeHtml(__('Add link')) ?></button>
+        </div>
+        <p class="brocode-ql-note">
+            <?= $escaper->escapeHtml(__('Paste any admin URL or an external http(s) link. Admin URLs are stored without their session key and keep working after you log in again.')) ?>
+        </p>
+    </form>
+</div>

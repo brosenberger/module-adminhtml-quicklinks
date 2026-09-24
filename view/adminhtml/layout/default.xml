@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <css src="BroCode_AdminhtmlQuickLinks::css/quicklinks.css"/>
+    </head>
+    <body>
+        <referenceContainer name="header">
+            <block class="BroCode\AdminhtmlQuickLinks\Block\Adminhtml\Header\QuickLinks"
+                   name="brocode.quicklinks.star"
+                   template="BroCode_AdminhtmlQuickLinks::header/star.phtml"
+                   aclResource="BroCode_AdminhtmlQuickLinks::quicklinks"/>
+            <block class="BroCode\AdminhtmlQuickLinks\Block\Adminhtml\Header\QuickLinks"
+                   name="brocode.quicklinks.bar"
+                   template="BroCode_AdminhtmlQuickLinks::header/bar.phtml"
+                   aclResource="BroCode_AdminhtmlQuickLinks::quicklinks"/>
+        </referenceContainer>
+        <!-- The backend theme moves search, notifications and user into header.inner.right;
+             the star floats with them, the bar must come after all of them. -->
+        <move element="brocode.quicklinks.star" destination="header.inner.right" after="notification.messages"/>
+        <move element="brocode.quicklinks.bar" destination="header.inner.right" after="-"/>
+    </body>
+</page>

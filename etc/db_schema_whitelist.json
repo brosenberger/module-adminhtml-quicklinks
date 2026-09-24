@@ -1,0 +1,21 @@
+{
+    "brocode_adminhtml_quicklink": {
+        "column": {
+            "link_id": true,
+            "user_id": true,
+            "label": true,
+            "url": true,
+            "is_external": true,
+            "is_pinned": true,
+            "sort_order": true,
+            "created_at": true
+        },
+        "index": {
+            "BROCODE_ADMINHTML_QUICKLINK_USER_ID_SORT_ORDER": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "BROCODE_ADMINHTML_QUICKLINK_USER_ID_ADMIN_USER_USER_ID": true
+        }
+    }
+}

@@ -1,0 +1,308 @@
+/**
+ * Copyright (C) 2026 Benjamin Rosenberger <bensch.rosenberger@gmail.com>
+ *
+ * @copyright 2026 Benjamin Rosenberger
+ * @author bensch.rosenberger@gmail.com
+ * @license MIT
+ * @link https://brocode.at
+ */
+
+/* Header row 1: star + dropdown, floated with search / notifications / user */
+.brocode-quicklinks.admin__action-dropdown-wrap {
+    display: flex;
+    align-items: center;
+    float: right;
+    position: relative;
+    margin-right: .6rem;
+}
+
+/*
+ * Header row 2: the pinned chips. The bar lives inside .page-header-actions, which is only
+ * a third of the header wide (col-l-4) or half of it (col-m-6); the negative margin
+ * stretches it back to the full header width so the chips are not squeezed.
+ */
+.brocode-quicklinks-bar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: .5rem;
+    clear: both;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.brocode-quicklinks-bar:has(> li) {
+    padding-top: .6rem;
+}
+
+@media (min-width: 768px) {
+    .page-header-actions .brocode-quicklinks-bar {
+        margin-left: -100%;
+    }
+}
+
+@media (min-width: 1024px) {
+    .page-header-actions .brocode-quicklinks-bar {
+        margin-left: -200%;
+    }
+}
+
+.brocode-quicklinks-item {
+    margin: 0;
+    min-width: 0;
+}
+
+.brocode-quicklinks-chip {
+    display: block;
+    max-width: 18rem;
+    padding: .5rem 1.2rem;
+    border: 1px solid #adadad;
+    border-radius: 1.6rem;
+    background: #fff;
+    color: #41362f;
+    font-size: 1.3rem;
+    line-height: 1.8rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-decoration: none;
+}
+
+.brocode-quicklinks-chip:hover,
+.brocode-quicklinks-chip:focus {
+    border-color: #eb5202;
+    color: #eb5202;
+    text-decoration: none;
+}
+
+.brocode-quicklinks-chip._external::after,
+.brocode-quicklinks-menu ._external::after {
+    content: ' \2197';
+}
+
+.brocode-quicklinks-star {
+    padding: 0 .4rem;
+    border: 0;
+    background: none;
+    box-shadow: none;
+    color: #adadad;
+    font-size: 2.2rem;
+    line-height: 3.3rem;
+    cursor: pointer;
+}
+
+.brocode-quicklinks-star:hover,
+.brocode-quicklinks-star:focus,
+.brocode-quicklinks-star:active {
+    background: none;
+    border: 0;
+    box-shadow: none;
+    color: #eb5202;
+}
+
+.brocode-quicklinks-star-icon::before {
+    content: '\2606';
+}
+
+.brocode-quicklinks-star[aria-pressed='true'] {
+    color: #eb5202;
+}
+
+.brocode-quicklinks-star[aria-pressed='true'] .brocode-quicklinks-star-icon::before {
+    content: '\2605';
+}
+
+.brocode-quicklinks .admin__action-dropdown.brocode-quicklinks-more {
+    padding: 0 2.4rem 0 .4rem;
+    height: 3.3rem;
+}
+
+.brocode-quicklinks .admin__action-dropdown-menu.brocode-quicklinks-menu {
+    right: 0;
+    left: auto;
+    min-width: 24rem;
+    max-width: 36rem;
+    z-index: 600;
+}
+
+.brocode-quicklinks-menu a {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.brocode-quicklinks-menu .brocode-quicklinks-manage {
+    border-top: 1px solid #e3e3e3;
+    margin-top: .4rem;
+    padding-top: .4rem;
+}
+
+.brocode-quicklinks-sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+/* System > Tools > Quick Links */
+.brocode-ql-intro {
+    max-width: 80rem;
+    margin-bottom: 2rem;
+}
+
+.brocode-ql-list {
+    max-width: 110rem;
+    margin: 0 0 3rem;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid #e3e3e3;
+}
+
+.brocode-ql-row {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    margin: 0;
+    padding: 1rem 1.2rem;
+    border-bottom: 1px solid #e3e3e3;
+    background: #fff;
+}
+
+.brocode-ql-row.ui-sortable-helper {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .2);
+}
+
+.brocode-ql-row.ui-sortable-placeholder {
+    visibility: visible !important;
+    background: #fff9e6;
+}
+
+.brocode-ql-handle {
+    flex: 0 0 auto;
+    width: 1.6rem;
+    cursor: grab;
+    color: #adadad;
+    font-size: 1.8rem;
+    line-height: 1;
+    text-align: center;
+}
+
+.brocode-ql-handle::before {
+    content: '\2630';
+}
+
+.brocode-ql-move {
+    display: flex;
+    flex: 0 0 auto;
+    gap: .3rem;
+}
+
+.brocode-ql-move button {
+    padding: .3rem .8rem;
+    font-size: 1.1rem;
+    line-height: 1.6rem;
+}
+
+.brocode-ql-view,
+.brocode-ql-edit {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.brocode-ql-view[hidden],
+.brocode-ql-edit[hidden] {
+    display: none;
+}
+
+.brocode-ql-label {
+    display: block;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.brocode-ql-url {
+    display: block;
+    color: #666;
+    font-size: 1.2rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.brocode-ql-badge {
+    display: inline-block;
+    margin-right: .4rem;
+    padding: 0 .6rem;
+    border-radius: .3rem;
+    background: #f1f1f1;
+    color: #41362f;
+    font-size: 1.1rem;
+}
+
+.brocode-ql-edit {
+    display: flex;
+    gap: .6rem;
+    align-items: center;
+}
+
+.brocode-ql-edit input[name='label'] {
+    flex: 0 1 26rem;
+}
+
+.brocode-ql-edit input[name='url'] {
+    flex: 1 1 30rem;
+}
+
+.brocode-ql-pin {
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+
+.brocode-ql-row-actions {
+    display: flex;
+    flex: 0 0 auto;
+    gap: .6rem;
+}
+
+.brocode-ql-empty[hidden] {
+    display: none;
+}
+
+.brocode-ql-add {
+    max-width: 110rem;
+}
+
+.brocode-ql-add-title {
+    margin: 0 0 1.2rem;
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+.brocode-ql-add-fields {
+    display: flex;
+    gap: .8rem;
+    flex-wrap: wrap;
+}
+
+.brocode-ql-add-fields input[name='label'] {
+    flex: 0 1 26rem;
+}
+
+.brocode-ql-add-fields input[name='url'] {
+    flex: 1 1 40rem;
+}
+
+.brocode-ql-note {
+    margin-top: .8rem;
+    color: #666;
+    font-size: 1.2rem;
+}
+
+.brocode-ql-row._editing [data-action='edit'] {
+    visibility: hidden;
+}

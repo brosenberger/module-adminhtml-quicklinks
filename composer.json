@@ -1,0 +1,49 @@
+{
+    "name": "brocode/module-adminhtml-quicklinks",
+    "description": "Personal quick links for Magento 2 admin users: favorite any backend page with one click, keep the links one click away in the admin header, and manage them - reorder, rename, pin, add external links - under System > Tools.",
+    "type": "magento2-module",
+    "version": "1.0.0",
+    "license": "MIT",
+    "homepage": "https://github.com/brosenberger/module-adminhtml-quicklinks",
+    "keywords": [
+        "magento2",
+        "magento",
+        "adminhtml",
+        "admin",
+        "favorites",
+        "bookmarks",
+        "quick-links",
+        "usability",
+        "brocode"
+    ],
+    "authors": [
+        {
+            "name": "Benjamin Rosenberger",
+            "email": "bensch.rosenberger@gmail.com"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/brosenberger/module-adminhtml-quicklinks/issues",
+        "source": "https://github.com/brosenberger/module-adminhtml-quicklinks"
+    },
+    "funding": [
+        {
+            "type": "buymeacoffee",
+            "url": "https://www.buymeacoffee.com/brosenberger"
+        }
+    ],
+    "require": {
+        "php": "~8.1.0||~8.2.0||~8.3.0||~8.4.0",
+        "magento/framework": ">=103.0.0",
+        "magento/module-backend": ">=102.0.0",
+        "magento/module-user": ">=101.2.0"
+    },
+    "autoload": {
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "BroCode\\AdminhtmlQuickLinks\\": ""
+        }
+    }
+}

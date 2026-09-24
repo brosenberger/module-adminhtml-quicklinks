@@ -1,0 +1,69 @@
+<?php
+/**
+ * Copyright (C) 2026 Benjamin Rosenberger <bensch.rosenberger@gmail.com>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ * @copyright 2026 Benjamin Rosenberger
+ * @author bensch.rosenberger@gmail.com
+ * @license MIT
+ * @link https://brocode.at
+ */
+declare(strict_types=1);
+
+/** @var \BroCode\AdminhtmlQuickLinks\Block\Adminhtml\Header\QuickLinks $block */
+/** @var \Magento\Framework\Escaper $escaper */
+
+$currentLinkId = $block->getCurrentLinkId();
+$widgetInit = '{"BroCode_AdminhtmlQuickLinks/js/quicklinks-toggle":' . $block->getWidgetConfigJson() . '}';
+?>
+<div class="brocode-quicklinks admin__action-dropdown-wrap"
+     data-mage-init="<?= $escaper->escapeHtmlAttr($widgetInit) ?>">
+    <button type="button"
+            class="brocode-quicklinks-star"
+            data-role="quicklinks-star"
+            aria-pressed="<?= $currentLinkId !== null ? 'true' : 'false' ?>"
+            title="<?= $escaper->escapeHtmlAttr(__('Add or remove this page from your quick links')) ?>">
+        <span class="brocode-quicklinks-star-icon" aria-hidden="true"></span>
+        <span class="brocode-quicklinks-sr"><?= $escaper->escapeHtml(__('Quick link for this page')) ?></span>
+    </button>
+    <a href="<?= $escaper->escapeUrl($block->getManageUrl()) ?>"
+       class="admin__action-dropdown brocode-quicklinks-more"
+       title="<?= $escaper->escapeHtmlAttr(__('More quick links')) ?>"
+       data-mage-init='{"dropdown":{}}'
+       data-toggle="dropdown">
+        <span class="brocode-quicklinks-sr"><?= $escaper->escapeHtml(__('More quick links')) ?></span>
+    </a>
+    <ul class="admin__action-dropdown-menu brocode-quicklinks-menu" data-role="quicklinks-overflow">
+        <?php foreach ($block->getOverflowLinks() as $link): ?>
+            <li class="brocode-quicklinks-item" data-link-id="<?= (int)$link->getLinkId() ?>">
+                <a href="<?= $escaper->escapeUrl($block->getHref($link)) ?>"
+                    <?php if ($link->isExternal()): ?>
+                        class="_external" target="_blank" rel="noopener noreferrer"
+                    <?php endif; ?>
+                ><?= $escaper->escapeHtml($link->getLabel()) ?></a>
+            </li>
+        <?php endforeach; ?>
+        <li class="brocode-quicklinks-manage">
+            <a href="<?= $escaper->escapeUrl($block->getManageUrl()) ?>">
+                <?= $escaper->escapeHtml(__('Manage quick links')) ?> &rarr;
+            </a>
+        </li>
+    </ul>
+</div>
